@@ -77,7 +77,7 @@ def render_row(links):
             elements.append(render_soundcloud(link))
         elif "vimeo" in link:
             pass
-            #elements.append(render_vimeo(link))
+            elements.append(render_vimeo(link))
         else:
             pass  # skip any other links
     return render_template('row.html', elements=elements)
@@ -122,8 +122,6 @@ def render_youtube(url):
     # render a youtube embed
     if "youtu.be" in url:
         uri = url.split("/")[-1]
-        if "?" in uri:
-            uri = uri.split("?")[0]
     else:
         uri = url.split("=")[-1]
 
@@ -155,6 +153,12 @@ def render_soundcloud(url):
         # see: http://stackoverflow.com/questions/36360202/soundcloud-api-urls-timing-out-and-then-returning-error-403-on-about-50-of-trac
         pass
     return render_template("soundcloud.html", URI=track.id)
+
+
+def render_vimeo(url):
+    uri = url.split("/")[-1]
+
+    return render_template("vimeo.html", URI=uri)
 
 
 def clean_links(links):
