@@ -8,6 +8,7 @@ from peewee import *
 
 SCID = open('SOUNDCLOUDID', 'r').read()
 client = soundcloud.Client(client_id=SCID)
+SUPPORTED_LINKS = ["youtu.be", "youtube.com", "spotify.com", "soundcloud.com"]
 
 
 def create_app():
@@ -39,29 +40,24 @@ def render_index(page_number):
                            ROW3=render_row(songs[first_item_on_page+6:first_item_on_page+9]),
                            PAGER=render_pager(page_number, total_elements))
 
-    # we need to get up to 9 entries for whichever page_number this is, and populate the rows with up to 3 entries each
-    # first_index = (page_number - 1) * 9
-    # last_index = first_index + 9
-    # if last_index > total_elements:
-    #     last_index = total_elements
-    #
-    # links_cleaned = clean_links(songs[first_index:last_index])
-    # while links_cleaned > 0:
-    #     links_cleaned = clean_links(songs)
-
-#    cur_songs = songs[first_index:last_index]
-    # return render_template('index.html', ROW1=render_row(cur_songs[:3]),
-    #                        ROW2=render_row(cur_songs[3:6]), ROW3=render_row(cur_songs[6:]),
-    #                        PAGER=render_pager(page_number, total_elements))
-
 
 def get_songs():
     links = Link.select()
     songs = []
     for link in links:
-        songs.append(link.link)
+        if is_supported(link.link):
+            songs.append(link.link)
     songs.reverse()
     return songs
+
+
+def is_supported(link):
+    for url in SUPPORTED_LINKS:
+        if "soundcloud" in link and valid_soundcloud_link(link):
+            return True
+        elif url in link:
+            return True
+    return False
 
 
 def render_row(links):
@@ -76,10 +72,7 @@ def render_row(links):
         elif "soundcloud" in link:
             elements.append(render_soundcloud(link))
         elif "vimeo" in link:
-            pass
             elements.append(render_vimeo(link))
-        else:
-            pass  # skip any other links
     return render_template('row.html', elements=elements)
 
 
@@ -128,16 +121,8 @@ def render_youtube(url):
     return render_template("youtube.html", URI=uri)
 
 
-# verify that a soundcloud link works because the API bars some songs from displaying & we don't want this to crash us
-def verify_soundcloud(url):
-    try:
-        if "/sets/" in url:
-            print("THIS ISN'T SUPPORTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")  # TODO: this is gross
-            raise HTTPError
-        track = client.get('/resolve', url=url)
-    except HTTPError:
-        # The soundcloud API will randomly fail on some tracks for no apparent reason
-        # see: http://stackoverflow.com/questions/36360202/soundcloud-api-urls-timing-out-and-then-returning-error-403-on-about-50-of-trac
+def valid_soundcloud_link(url):
+    if "soundcloud" in url and "/sets/" in url:  # we can't support sets.
         return False
     return True
 
@@ -159,17 +144,6 @@ def render_vimeo(url):
     uri = url.split("/")[-1]
 
     return render_template("vimeo.html", URI=uri)
-
-
-def clean_links(links):
-    links_cleaned = 0
-    for link in links:
-        if 'soundcloud' in link:
-            is_valid_link = verify_soundcloud(link)
-            if not is_valid_link:
-                links_cleaned += 1
-                links.remove(link)
-    return links_cleaned
 
 
 class Link(Model):
