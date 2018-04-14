@@ -9,6 +9,7 @@ from peewee import *
 SCID = open('SOUNDCLOUDID', 'r').read()
 client = soundcloud.Client(client_id=SCID)
 SUPPORTED_LINKS = ["youtu.be", "youtube.com", "spotify.com", "soundcloud.com"]
+LINKS_PER_PAGE = 9
 
 
 def create_app():
@@ -30,9 +31,12 @@ def render_home():
 
 @app.route("/pages/<int:page_number>")
 def render_index(page_number):
+    if page_number <= 0:
+        return redirect("/pages/1")
+
     songs = get_songs()
-    total_elements = len(songs)  # TODO: count the rows in the db instead of this
-    first_item_on_page = 9*(page_number-1)
+    total_elements = len(songs)
+    first_item_on_page = LINKS_PER_PAGE*(page_number-1)
 
     return render_template('index.html',
                            ROW1=render_row(songs[first_item_on_page:first_item_on_page+3]),
@@ -76,26 +80,29 @@ def render_row(links):
     return render_template('row.html', elements=elements)
 
 
-def render_pager(curpage, total_elements):
-    if curpage == 1:
-        newer_link = "#"
-        newer_disabled = " disabled"
-        if total_elements > 9:
-            older_disabled = ""
-            older_link = "/pages/" + str(curpage + 1)
-        else:
-            older_disabled = " disabled"
-            older_link = "#"
-    else:
-        newer_link = "/pages/" + str(curpage - 1)
-        newer_disabled = ""
-        if total_elements > curpage * 9:
-            older_disabled = ""
-            older_link = "/pages/" + str(curpage + 1)
-        else:
-            older_disabled = " disabled"
-            older_link = "#"
-    return render_template("pager.html", DISABLED1=older_disabled, DISABLED2=newer_disabled, OLDER=older_link, NEWER=newer_link)
+def render_pager(page_number, total_elements):
+    can_go_forward = False
+    can_go_back = False
+
+    if next_page_exists(page_number, total_elements):
+        can_go_forward = True
+
+    if previous_page_exists(page_number):
+        can_go_back = True
+
+    return render_template("pager.html", page_number=page_number, can_go_back=can_go_back, can_go_forward=can_go_forward)
+
+
+def next_page_exists(page_number, total_elements):
+    if total_elements > page_number * LINKS_PER_PAGE:
+        return True
+    return False
+
+
+def previous_page_exists(page_number):
+    if page_number != 1:
+        return True
+    return False
 
 
 def render_spotify(url):
@@ -129,8 +136,6 @@ def valid_soundcloud_link(url):
 
 def render_soundcloud(url):
     # render a soundcloud embed
-    if "/sets/" in url:
-        print("THIS ISN'T SUPPORTED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")  # TODO: this is gross
     try:
         track = client.get('/resolve', url=url)
     except HTTPError:

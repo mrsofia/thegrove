@@ -1,6 +1,17 @@
 <nav aria-label="...">
     <ul class="pager">
-        <li class="previous{{ DISABLED2 }}"><a href="{{ NEWER }}"><span aria-hidden="true">&larr;</span> Newer</a></li>
-        <li class="next{{ DISABLED1 }}"><a href="{{ OLDER }}">Older <span aria-hidden="true">&rarr;</span></a></li>
+
+        {% if can_go_back %}
+        <li class="previous"><a href="/pages/{{ page_number - 1 }}"><span>&larr;</span> Older </a></li>
+        {% else %}
+        <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Older </a></li>
+        {% endif %}
+
+        {% if can_go_forward %}
+        <li class="next"><a href="/pages/{{ page_number + 1 }}"><span>&rarr;</span> Newer </a></li>
+        {% else %}
+        <li class="next disabled"><a href="#"><span aria-hidden="true">&rarr;</span> Newer </a></li>
+        {% endif %}
+
     </ul>
 </nav>
