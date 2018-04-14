@@ -1,0 +1,13 @@
+env
+__pycache__
+TOKEN
+TOKEN_dev
+TOKEN_prod
+bot.log
+grovedb
+PRODTOKEN
+.DS_Store
+PID
+nohup.out
+.idea/*
+SOUNDCLOUDID
