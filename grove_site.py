@@ -31,8 +31,12 @@ def render_home():
 def render_index(page_number):
     songs = get_songs()
     total_elements = len(songs)  # TODO: count the rows in the db instead of this
-    return render_template('index.html', ROW1=render_row(songs[:3]),
-                           ROW2=render_row(songs[3:6]), ROW3=render_row(songs[6:]),
+    first_item_on_page = 9*(page_number-1)
+
+    return render_template('index.html',
+                           ROW1=render_row(songs[first_item_on_page:first_item_on_page+3]),
+                           ROW2=render_row(songs[first_item_on_page+3:first_item_on_page+6]),
+                           ROW3=render_row(songs[first_item_on_page+6:first_item_on_page+9]),
                            PAGER=render_pager(page_number, total_elements))
 
     # we need to get up to 9 entries for whichever page_number this is, and populate the rows with up to 3 entries each
@@ -76,8 +80,7 @@ def render_row(links):
             #elements.append(render_vimeo(link))
         else:
             pass  # skip any other links
-    element1, element2, element3 = elements[:3]
-    return render_template('row.html', ELEMENT1=element1, ELEMENT2=element2, ELEMENT3=element3)
+    return render_template('row.html', elements=elements)
 
 
 def render_pager(curpage, total_elements):
