@@ -22,16 +22,16 @@ pip install uwsgi flask
 
 # TODO: .service file will need to be populate w/ appropriate data before moving. Try a python script.
 #   Data to infill includes: User, WorkingDir, Environment, ExecStart
-mv /resources/buildserver.service /etc/systemd/system/buildserver.service
+mv /resources/thegrove.service /etc/systemd/system/thegrove.service
 
-systemctl start buildserver
-systemctl enable buildserver
+systemctl start thegrove
+systemctl enable thegrove
 
 # TODO: sites-available file will need to be populated w/ appropriate data as well. Python script might be good.
 #   Data to infill includes: server_domain_or_IP, socket file,
-mv /resources/buildserver_sites-available /etc/nginx/sites-available/buildserver
+mv /resources/thegrove_sites-available /etc/nginx/sites-available/thegrove
 
-ln -s /etc/nginx/sites-available/buildserver /etc/nginx/sites-enabled
+ln -s /etc/nginx/sites-available/thegrove /etc/nginx/sites-enabled
 
 systemctl restart nginx
 

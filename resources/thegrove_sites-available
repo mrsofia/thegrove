@@ -1,8 +1,8 @@
 server {
     listen 80;
-    server_name 192.241.159.83 builds.pison.io;
+    server_name 159.89.88.234 thegrove.io;
     location / {
         include uwsgi_params;
-        uwsgi_pass unix:/home/justin/deploy_latest_builds/project.sock;
+        uwsgi_pass unix:/home/justin/thegrove/project.sock;
     }
 }
