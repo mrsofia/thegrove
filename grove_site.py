@@ -6,7 +6,7 @@ from werkzeug.utils import redirect
 from peewee import *
 
 
-SCID = open('SOUNDCLOUDID', 'r').read()
+SCID = open('SOUNDCLOUDID', 'r').read().strip()
 client = soundcloud.Client(client_id=SCID)
 SUPPORTED_LINKS = ["youtu.be", "youtube.com", "spotify.com", "soundcloud.com"]
 LINKS_PER_PAGE = 9
@@ -137,12 +137,11 @@ def valid_soundcloud_link(url):
 def render_soundcloud(url):
     # render a soundcloud embed
     try:
-        track = client.get('/resolve', url=url)
-    except HTTPError:
-        # The soundcloud API will randomly fail on some tracks for no apparent reason
-        # see: http://stackoverflow.com/questions/36360202/soundcloud-api-urls-timing-out-and-then-returning-error-403-on-about-50-of-trac
-        pass
-    return render_template("soundcloud.html", URI=track.id)
+        track = client.get('/resolve', url=url, allow_redirects=False)
+    except HTTPError as error:
+        print(error)
+        return render_template("soundcloud.html", URI=None, error=True, error_text=error)
+    return render_template("soundcloud.html", URI=track.location, error=False, error_text="")
 
 
 def render_vimeo(url):
