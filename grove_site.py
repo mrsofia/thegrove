@@ -64,6 +64,12 @@ def is_supported(link):
     return False
 
 
+def valid_soundcloud_link(url):
+    if "soundcloud" in url and "/sets/" in url:  # we can't support sets.
+        return False
+    return True
+
+
 def render_row(links):
     if len(links) == 0:
         return ""
@@ -126,12 +132,6 @@ def render_youtube(url):
         uri = url.split("=")[-1]
 
     return render_template("youtube.html", URI=uri)
-
-
-def valid_soundcloud_link(url):
-    if "soundcloud" in url and "/sets/" in url:  # we can't support sets.
-        return False
-    return True
 
 
 def render_soundcloud(url):
